@@ -72,7 +72,6 @@ if is_py2:
 
     bytes = str
     str = unicode
-    stdout = sys.stdout
     xrange = xrange
 
 
@@ -88,5 +87,14 @@ elif is_py3:
 
     str = str
     bytes = bytes
-    stdout = sys.stdout.buffer
     xrange = range
+    
+# see issue #5: not every stdout in Py3 has a "buffer" property for binary output. 
+# Here we assume that sys.stdout can emit binary data if it does not have the buffer property (this is the case for Spyder 5 terminal)
+# We can end up with a stdout without a "buffer" attribute, that is not capable of binary output, but that situation is unknown, and will
+# only fail if the CLI is used for piping stdout.
+
+if hasattr(sys.stdout, 'buffer'):
+    stdout = sys.stdout.buffer
+else:
+    stdout = sys.stdout
